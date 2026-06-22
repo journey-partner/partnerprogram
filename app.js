@@ -12,8 +12,11 @@ App({
         env: 'cloudbase-d0g2f9pho3fc14998'
       });
       console.log('✅ 云开发初始化完成，环境: cloudbase-d0g2f9pho3fc14998');
+
+      // 从云端同步数据到本地缓存（耗时操作，异步执行）
+      storage.syncFromCloud();
     } else {
-      console.warn('⚠️ wx.cloud 不可用，请确认已开启云开发');
+      console.warn('⚠️ wx.cloud 不可用，使用本地存储模式');
     }
 
     // 获取用户ID

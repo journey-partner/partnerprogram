@@ -1,78 +1,140 @@
 /**
- * 统一存储工具 - 支持本地和云端双模式
- * 
- * 默认使用本地存储（向后兼容），云托管部署后切换为云端模式
- * 切换方式：将 USE_CLOUD 设为 true，并在云托管控制台获取 API 地址
+ * 统一存储工具 - 云开发优先 + 本地缓存兜底
+ *
+ * 设计原则：
+ *   1. 所有读取从本地缓存（毫秒级），写入先本地再异步同步到云端
+ *   2. 首次打开时从云端拉取数据到本地缓存
+ *   3. 云端不可用时自动降级为纯本地模式
+ *   4. 对外 API 保持同步（兼容现有页面代码）
  */
+
 const rainbowCards = require('./rainbowCards.js');
 
-// ========== 模式切换 ==========
-const USE_CLOUD = false; // TODO: 云托管部署后改为 true
+// ========== 云函数调用 ==========
+function callDbApi(action, collection, data, id, query) {
+  return new Promise((resolve) => {
+    if (!wx.cloud) {
+      console.warn('⚠️ wx.cloud 不可用，跳过云端操作');
+      return resolve(null);
+    }
+    wx.cloud.callFunction({
+      name: 'dbApi',
+      data: { action, collection, data, id, query },
+      success: (res) => resolve(res.result),
+      fail: (err) => {
+        console.warn('云端调用失败:', err.errMsg || err);
+        resolve(null);
+      }
+    });
+  });
+}
 
 // ========== 存储键 ==========
-const STORAGE_KEYS = {
+const KEYS = {
   RAINBOW_CARD: 'rainbow_card_today',
   RAINBOW_CARD_DATE: 'rainbow_card_date',
   TASKS: 'tasks',
   LOGS: 'logs',
   USER_INFO: 'user_info',
-  CLOUD_SYNC: 'cloud_sync_enabled'
+  CLOUD_SYNCED: 'cloud_synced_flag'
 };
 
 // ========== 用户ID ==========
 function getUserId() {
-  let userId = wx.getStorageSync(STORAGE_KEYS.USER_INFO);
+  let userId = wx.getStorageSync(KEYS.USER_INFO);
   if (!userId) {
     userId = 'user_' + Date.now();
-    wx.setStorageSync(STORAGE_KEYS.USER_INFO, userId);
+    wx.setStorageSync(KEYS.USER_INFO, userId);
   }
   return userId;
+}
+
+// ========== 云端同步（初始化时调用）==========
+function syncFromCloud() {
+  if (!wx.cloud) return;
+  callDbApi('syncAll').then(res => {
+    if (!res || res.code !== 0) return;
+    const { tasks, logs, rainbowCards: cards } = res.data;
+
+    if (tasks && tasks.length > 0) {
+      // 去掉 _id/_openid 等云字段，保持与本地格式一致
+      const cleaned = tasks.map(cleanCloudFields);
+      if (JSON.stringify(cleaned) !== wx.getStorageSync(KEYS.TASKS)) {
+        wx.setStorageSync(KEYS.TASKS, JSON.stringify(cleaned));
+      }
+    }
+    if (logs && logs.length > 0) {
+      const cleaned = logs.map(cleanCloudFields);
+      if (JSON.stringify(cleaned) !== wx.getStorageSync(KEYS.LOGS)) {
+        wx.setStorageSync(KEYS.LOGS, JSON.stringify(cleaned));
+      }
+    }
+    if (cards && cards.length > 0) {
+      const latest = cards[0];
+      wx.setStorageSync(KEYS.RAINBOW_CARD, cleanCloudFields(latest));
+      wx.setStorageSync(KEYS.RAINBOW_CARD_DATE, latest.card_date || '');
+    }
+
+    wx.setStorageSync(KEYS.CLOUD_SYNCED, Date.now());
+    console.log('✅ 云端数据已同步到本地缓存');
+  });
+}
+
+function cleanCloudFields(doc) {
+  const { _id, _openid, updatedAt, ...rest } = doc;
+  return rest;
 }
 
 // ========== 彩虹卡 ==========
 function getTodayRainbowCard() {
   const date = new Date();
   const today = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  const savedDate = wx.getStorageSync(STORAGE_KEYS.RAINBOW_CARD_DATE);
+  const savedDate = wx.getStorageSync(KEYS.RAINBOW_CARD_DATE);
   if (savedDate !== today) return null;
-  return wx.getStorageSync(STORAGE_KEYS.RAINBOW_CARD);
+  return wx.getStorageSync(KEYS.RAINBOW_CARD);
 }
 
 function saveTodayRainbowCard(card) {
   const date = new Date();
   const today = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  wx.setStorageSync(STORAGE_KEYS.RAINBOW_CARD_DATE, today);
-  wx.setStorageSync(STORAGE_KEYS.RAINBOW_CARD, card);
+  wx.setStorageSync(KEYS.RAINBOW_CARD_DATE, today);
+  wx.setStorageSync(KEYS.RAINBOW_CARD, card);
 
-  // 云端同步（异步，不阻塞）
-  if (USE_CLOUD) {
-    syncRainbowCardToCloud(card);
-  }
+  // 异步同步到云端
+  callDbApi('add', 'rainbowCards', {
+    card_date: today,
+    card_color: card.color,
+    card_name: card.name,
+    card_meaning: card.meaning,
+    card_affirmation: card.affirmation
+  }).then(res => {
+    if (res && res.code === 0) console.log('🌈 彩虹卡已同步');
+  });
 }
 
 // ========== 任务 CRUD ==========
 function getAllTasks() {
-  const tasks = wx.getStorageSync(STORAGE_KEYS.TASKS);
+  const tasks = wx.getStorageSync(KEYS.TASKS);
   return tasks ? JSON.parse(tasks) : [];
 }
 
 function saveTasks(tasks) {
-  wx.setStorageSync(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+  wx.setStorageSync(KEYS.TASKS, JSON.stringify(tasks));
 }
 
 function addTask(task) {
   const tasks = getAllTasks();
-  task.id = Date.now().toString();
-  task.createdAt = new Date().toISOString();
-  if (!task.status) task.status = 'in_progress';
+  task.id = task.id || Date.now().toString();
+  task.createdAt = task.createdAt || new Date().toISOString();
+  task.status = task.status || 'in_progress';
   task.checkInRecords = task.checkInRecords || [];
   tasks.unshift(task);
   saveTasks(tasks);
 
-  // 云端同步
-  if (USE_CLOUD) {
-    syncTaskToCloud(task, 'create');
-  }
+  // 异步同步到云端
+  callDbApi('add', 'tasks', task).then(res => {
+    if (res && res.code === 0) console.log('📋 任务已同步');
+  });
 
   return task;
 }
@@ -80,45 +142,45 @@ function addTask(task) {
 function updateTask(taskId, updates) {
   const tasks = getAllTasks();
   const index = tasks.findIndex(t => t.id === taskId);
-  if (index !== -1) {
-    tasks[index] = { ...tasks[index], ...updates };
-    saveTasks(tasks);
+  if (index === -1) return null;
 
-    if (USE_CLOUD) {
-      syncTaskToCloud({ id: taskId, ...updates }, 'update');
-    }
+  tasks[index] = { ...tasks[index], ...updates };
+  saveTasks(tasks);
 
-    return tasks[index];
-  }
-  return null;
+  // 异步同步到云端（用 id 而非 _id 查找）
+  _findCloudIdAndUpdate('tasks', taskId, updates);
+
+  return tasks[index];
 }
 
 function deleteTask(taskId) {
   const tasks = getAllTasks();
   const filtered = tasks.filter(t => t.id !== taskId);
   saveTasks(filtered);
+
+  _findCloudIdAndUpdate('tasks', taskId, { _deleted: true });
 }
 
 // ========== 日志 CRUD ==========
 function getAllLogs() {
-  const logs = wx.getStorageSync(STORAGE_KEYS.LOGS);
+  const logs = wx.getStorageSync(KEYS.LOGS);
   return logs ? JSON.parse(logs) : [];
 }
 
 function saveLogs(logs) {
-  wx.setStorageSync(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+  wx.setStorageSync(KEYS.LOGS, JSON.stringify(logs));
 }
 
 function addLog(log) {
   const logs = getAllLogs();
-  log.id = Date.now().toString();
-  log.createdAt = new Date().toISOString();
+  log.id = log.id || Date.now().toString();
+  log.createdAt = log.createdAt || new Date().toISOString();
   logs.unshift(log);
   saveLogs(logs);
 
-  if (USE_CLOUD) {
-    syncLogToCloud(log, 'create');
-  }
+  callDbApi('add', 'logs', log).then(res => {
+    if (res && res.code === 0) console.log('📝 日志已同步');
+  });
 
   return log;
 }
@@ -126,12 +188,13 @@ function addLog(log) {
 function updateLog(logId, updates) {
   const logs = getAllLogs();
   const index = logs.findIndex(l => l.id === logId);
-  if (index !== -1) {
-    logs[index] = { ...logs[index], ...updates };
-    saveLogs(logs);
-    return logs[index];
-  }
-  return null;
+  if (index === -1) return null;
+
+  logs[index] = { ...logs[index], ...updates };
+  saveLogs(logs);
+
+  _findCloudIdAndUpdate('logs', logId, updates);
+  return logs[index];
 }
 
 function deleteLog(logId) {
@@ -140,60 +203,52 @@ function deleteLog(logId) {
   saveLogs(filtered);
 }
 
-// ========== 云端同步（异步，自动重试）==========
-const API_BASE = 'https://your-service.run.tcloudbase.com'; // TODO: 替换为云托管域名
+// ========== 云端 ID 查找 & 更新（辅助）==========
+function _findCloudIdAndUpdate(collection, localId, updates) {
+  // 先查本地缓存的 cloud _id 映射
+  const mapKey = `${collection}_id_map`;
+  let idMap = {};
+  try {
+    idMap = JSON.parse(wx.getStorageSync(mapKey) || '{}');
+  } catch (e) {}
 
-function cloudPost(path, data) {
-  return new Promise((resolve) => {
-    wx.request({
-      url: API_BASE + path,
-      method: 'POST',
-      header: { 'content-type': 'application/json', 'x-user-id': getUserId() },
-      data: data,
-      success: (res) => resolve(res.data),
-      fail: (err) => {
-        console.warn('云端同步失败（将重试）:', err);
-        resolve(null);
-      }
-    });
+  if (idMap[localId]) {
+    callDbApi('update', collection, updates, idMap[localId]);
+    return;
+  }
+
+  // 没有映射则从云端查找
+  callDbApi('list', collection, null, null, { id: localId }).then(res => {
+    if (res && res.code === 0 && res.data.length > 0) {
+      const cloudId = res.data[0]._id;
+      idMap[localId] = cloudId;
+      wx.setStorageSync(mapKey, JSON.stringify(idMap));
+      callDbApi('update', collection, updates, cloudId);
+    }
   });
 }
 
-function syncRainbowCardToCloud(card) {
-  cloudPost('/api/rainbow-card', card).then(res => {
-    if (res && res.code === 0) console.log('✅ 彩虹卡已同步到云端');
-  });
-}
-
-function syncTaskToCloud(task, action) {
-  const path = action === 'create' ? '/api/tasks' : `/api/tasks/${task.id}`;
-  const method = action === 'create' ? 'POST' : 'PUT';
-  cloudPost(path, task).then(res => {
-    if (res && res.code === 0) console.log('✅ 任务已同步到云端');
-  });
-}
-
-function syncLogToCloud(log, action) {
-  const path = action === 'create' ? '/api/logs' : `/api/logs/${log.id}`;
-  const method = action === 'create' ? 'POST' : 'PUT';
-  cloudPost(path, log).then(res => {
-    if (res && res.code === 0) console.log('✅ 日志已同步到云端');
-  });
-}
-
+// ========== 公开 API ==========
 module.exports = {
-  STORAGE_KEYS,
+  KEYS,
+  getUserId,
+  syncFromCloud,
+
+  // 彩虹卡
   getTodayRainbowCard,
   saveTodayRainbowCard,
+
+  // 任务
   getAllTasks,
   saveTasks,
   addTask,
   updateTask,
   deleteTask,
+
+  // 日志
   getAllLogs,
   saveLogs,
   addLog,
   updateLog,
-  deleteLog,
-  getUserId
+  deleteLog
 };
