@@ -1,0 +1,3 @@
+<view class="logo-box">
+  <image class="logo-img" src="/components/logo/logo.svg" mode="aspectFit" />
+</view>

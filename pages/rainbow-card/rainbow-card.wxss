@@ -1,0 +1,247 @@
+/* 彩虹卡 - 全部使用语义化变量 */
+
+.page-container {
+  min-height: 100vh;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+}
+
+/* ---------- 未抽取 ---------- */
+.draw-area {
+  text-align: center;
+  padding: 80rpx var(--space-xl);
+  animation: fadeInUp 0.6s ease;
+}
+.draw-illustration {
+  width: 240rpx;
+  height: 240rpx;
+  margin: 0 auto var(--space-2xl);
+  background: var(--color-accent-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.draw-illustration-icon {
+  font-size: 100rpx;
+}
+.draw-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+.draw-sub {
+  font-size: 28rpx;
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: var(--space-2xl);
+}
+.draw-btn {
+  display: inline-flex;
+  padding: 28rpx 72rpx;
+}
+.draw-btn.drawing {
+  animation: breathe 1.5s ease-in-out infinite;
+}
+
+/* 引导行 */
+.guide-row {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+.guide-row-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.guide-row-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  display: block;
+  margin-bottom: 8rpx;
+}
+.guide-row-desc {
+  font-size: 25rpx;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* ---------- 抽取动效 ---------- */
+.drawing-area {
+  padding: 100rpx var(--space-xl);
+  text-align: center;
+}
+.flip-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-xl);
+}
+.flip-card {
+  width: 300rpx;
+  height: 400rpx;
+  background: var(--color-accent);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xl);
+  transition: all 0.6s;
+}
+.flip-card.flip {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+.flip-shimmer {
+  font-size: 80rpx;
+  animation: breathe 1.5s ease-in-out infinite;
+}
+.drawing-text {
+  font-size: 28rpx;
+  color: var(--color-text-muted);
+}
+
+/* ---------- 结果区 ---------- */
+.result-area {
+  padding: var(--space-xl);
+  animation: fadeInUp 0.6s ease;
+}
+.result-label {
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-accent);
+  display: block;
+  margin-bottom: var(--space-xl);
+}
+
+/* 彩虹卡片核心样式 */
+.rainbow-card-box {
+  border-radius: var(--radius-xl);
+  padding: 56rpx 40rpx;
+  margin-bottom: var(--space-xl);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+.card-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+  animation: glow-move 4s ease-in-out infinite;
+}
+@keyframes glow-move {
+  0%, 100% { transform: translate(-10%, -10%); }
+  50% { transform: translate(10%, 10%); }
+}
+.card-body {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.card-icon-wrap {
+  width: 120rpx;
+  height: 120rpx;
+  margin: 0 auto var(--space-lg);
+  background: rgba(255,255,255,0.25);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-icon-big {
+  font-size: 72rpx;
+}
+.card-name-big {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: var(--color-text-inverse);
+  display: block;
+  margin-bottom: var(--space-lg);
+}
+.card-divider {
+  width: 80rpx;
+  height: 4rpx;
+  background: rgba(255,255,255,0.6);
+  margin: 0 auto var(--space-lg);
+  border-radius: 2rpx;
+}
+.card-meaning {
+  font-size: 30rpx;
+  color: var(--color-text-inverse);
+  line-height: 1.8;
+  opacity: 0.95;
+}
+
+/* 肯定语 */
+.section-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  display: block;
+  margin-bottom: var(--space-md);
+}
+.affirmation {
+  font-size: 30rpx;
+  color: var(--color-accent);
+  line-height: 1.8;
+  text-align: center;
+  display: block;
+  font-weight: 500;
+}
+
+/* 行动 */
+.action-card {
+  padding: 0;
+  overflow: hidden;
+}
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 28rpx var(--space-xl);
+  border-bottom: 1rpx solid var(--color-border-light);
+  gap: var(--space-md);
+}
+.action-item:last-child { border-bottom: none; }
+.action-num {
+  width: 44rpx;
+  height: 44rpx;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: 22rpx;
+  font-weight: 600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.action-text {
+  font-size: 28rpx;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* 再次提示 */
+.again-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xl);
+  padding: var(--space-lg);
+  background: #fefce8;
+  border-radius: var(--radius-md);
+  border: 1rpx solid #fef08a;
+}
+.again-icon { display: flex; align-items: center; flex-shrink: 0; }
+.again-text {
+  font-size: 26rpx;
+  color: var(--color-warning);
+}

@@ -1,0 +1,142 @@
+<!-- Nav spacer since nav-bar is fixed -->
+<view class="nav-spacer"></view>
+
+<view class="page-container">
+
+  <!-- 导航 -->
+  <view class="nav-bar">
+    <view class="nav-btn-left">
+      <text class="nav-btn" bindtap="goBack"><icon name="arrow-left" size="40" /></text>
+    </view>
+    <text class="nav-title">创建任务</text>
+    <view class="nav-btn-right"></view>
+  </view>
+
+  <!-- 任务名称 -->
+  <view class="form-section">
+    <view class="card form-card">
+      <view class="form-label">任务名称 <text style="color:#dc2626">*</text></view>
+      <view class="form-input-wrap">
+        <input class="input" 
+               placeholder="给任务起个名字" 
+               value="{{taskName}}"
+               bindinput="onNameInput"
+               maxlength="50"/>
+      </view>
+    </view>
+  </view>
+
+  <!-- 描述 -->
+  <view class="form-section">
+    <view class="card form-card">
+      <view class="form-label">任务描述</view>
+      <textarea class="textarea" 
+                placeholder="添加任务描述（可选）" 
+                value="{{taskDesc}}"
+                bindinput="onDescInput"
+                maxlength="200"></textarea>
+    </view>
+  </view>
+
+  <!-- 计划时间 -->
+  <view class="form-section">
+    <view class="card form-card">
+      <view class="form-label"><icon name="calendar" size="32" color="#059669" /> 计划时间</view>
+      <view class="date-row">
+        <view class="date-item">
+          <text class="date-label">开始日期</text>
+          <picker mode="date" value="{{planStartDate}}" bindchange="onStartDateChange">
+            <view class="date-picker-box">
+              <text class="{{planStartDate ? 'date-picker-text' : 'date-picker-placeholder'}}">{{planStartDate || '请选择'}}</text>
+            </view>
+          </picker>
+        </view>
+        <text class="date-sep">至</text>
+        <view class="date-item">
+          <text class="date-label">结束日期</text>
+          <picker mode="date" value="{{planEndDate}}" bindchange="onEndDateChange">
+            <view class="date-picker-box">
+              <text class="{{planEndDate ? 'date-picker-text' : 'date-picker-placeholder'}}">{{planEndDate || '请选择'}}</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 打卡周期 -->
+  <view class="form-section">
+    <view class="card form-card">
+      <view class="form-label"><icon name="star" size="32" color="#f59e0b" /> 打卡设置</view>
+      <view class="checkin-type-row">
+        <view class="checkin-type-item {{checkinType === 'none' ? 'checkin-type-active' : ''}}" 
+              bindtap="onCheckinType" data-type="none">不需要打卡</view>
+        <view class="checkin-type-item {{checkinType === 'daily' ? 'checkin-type-active' : ''}}" 
+              bindtap="onCheckinType" data-type="daily">每日打卡</view>
+        <view class="checkin-type-item {{checkinType === 'weekly' ? 'checkin-type-active' : ''}}" 
+              bindtap="onCheckinType" data-type="weekly">每周打卡</view>
+      </view>
+
+      <!-- 每周打卡 - 选择具体日期 -->
+      <view class="weekly-section {{checkinType === 'weekly' ? 'show' : ''}}">
+        <text class="weekly-label">选择打卡日（可多选）</text>
+        <view class="weekday-selector">
+          <view class="weekday-chip {{weekdayFlags[1] ? 'weekday-chip-active' : ''}}" 
+                bindtap="onWeekdayToggle" data-day="1">周一</view>
+          <view class="weekday-chip {{weekdayFlags[2] ? 'weekday-chip-active' : ''}}" 
+                bindtap="onWeekdayToggle" data-day="2">周二</view>
+          <view class="weekday-chip {{weekdayFlags[3] ? 'weekday-chip-active' : ''}}" 
+                bindtap="onWeekdayToggle" data-day="3">周三</view>
+          <view class="weekday-chip {{weekdayFlags[4] ? 'weekday-chip-active' : ''}}" 
+                bindtap="onWeekdayToggle" data-day="4">周四</view>
+          <view class="weekday-chip {{weekdayFlags[5] ? 'weekday-chip-active' : ''}}" 
+                bindtap="onWeekdayToggle" data-day="5">周五</view>
+          <view class="weekday-chip {{weekdayFlags[6] ? 'weekday-chip-active' : ''}}" 
+                bindtap="onWeekdayToggle" data-day="6">周六</view>
+          <view class="weekday-chip {{weekdayFlags[0] ? 'weekday-chip-active' : ''}}" 
+                bindtap="onWeekdayToggle" data-day="0">周日</view>
+        </view>
+      </view>
+
+      <!-- 提醒 -->
+      <view class="switch-row" wx:if="{{checkinType !== 'none'}}" style="margin-top:24rpx">
+        <view class="switch-info">
+          <text class="switch-label"><icon name="bell" size="32" color="#059669" /> 打卡提醒</text>
+          <text class="switch-desc">在设定时间提醒打卡</text>
+        </view>
+        <switch checked="{{hasReminder}}" bindchange="onReminderChange" color="#059669"/>
+      </view>
+      <view class="reminder-section {{hasReminder ? 'show' : ''}}" wx:if="{{checkinType !== 'none'}}">
+        <picker mode="time" value="{{reminderTime}}" bindchange="onTimeChange">
+          <view class="reminder-box">
+            <text class="reminder-label">提醒时间</text>
+            <text class="reminder-time">{{reminderTime || '09:00'}}</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <!-- 鼓励语 -->
+  <view class="form-section" wx:if="{{checkinType !== 'none'}}">
+    <view class="card form-card encourage-card">
+      <view class="form-label"><icon name="gift" size="32" color="#ec4899" /> 陪伴式提醒语</view>
+      <textarea class="textarea" 
+                placeholder="设置一个温柔的提醒话语" 
+                value="{{encourageText}}"
+                bindinput="onEncourageInput"
+                maxlength="100"></textarea>
+      <view class="suggest-list">
+        <text class="suggest-tag" wx:for="{{suggestEncourages}}" wx:key="index" bindtap="useEncourage" data-text="{{item}}">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="action-bar">
+    <view class="btn {{canSave ? 'btn-primary' : ''}}" style="{{canSave ? '' : 'background:#e5e7eb;'}}" bindtap="saveTask">
+      <text>创建任务</text>
+    </view>
+  </view>
+
+</view>

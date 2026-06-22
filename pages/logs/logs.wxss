@@ -1,0 +1,105 @@
+/* 日志列表 - 全部使用语义化变量 */
+
+.page-container {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+/* FAB 悬浮按钮 - 提升 z-index 和位置避免与 tab bar 冲突 */
+.fab {
+  bottom: calc(140rpx + env(safe-area-inset-bottom));
+  z-index: 1000;
+}
+
+/* 标签筛选 - 下拉框 */
+.filter-wrap {
+  background: var(--color-white);
+  padding: var(--space-md) var(--space-xl) var(--space-lg);
+  margin: 0 var(--space-xl) var(--space-lg);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--color-border-light);
+  border-top: none;
+}
+.filter-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 28rpx;
+  background: var(--color-bg-secondary);
+  border: 2rpx solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-height: 80rpx;
+  transition: border-color 0.2s;
+}
+.filter-picker:active {
+  border-color: var(--color-accent);
+}
+.filter-picker-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.filter-picker-text {
+  font-size: 28rpx;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* 引导 */
+.guide-list { display: flex; flex-direction: column; gap: var(--space-md); }
+.guide-item { display: flex; align-items: flex-start; gap: var(--space-sm); }
+.guide-tag-icon { display: flex; align-items: center; flex-shrink: 0; line-height: 1; }
+.guide-item-text { font-size: 25rpx; color: var(--color-primary-dark); line-height: 1.7; flex: 1; }
+
+/* 日志列表 */
+.log-list { padding: 0 var(--space-xl); }
+.log-group { margin-bottom: var(--space-xl); }
+.date-header {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  display: block;
+  padding: 10rpx 0;
+  margin-bottom: var(--space-sm);
+}
+.log-card {
+  padding: 28rpx;
+  margin-bottom: var(--space-md);
+}
+.log-card:active { background: var(--color-bg); }
+.log-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+.log-time {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+}
+.log-text {
+  font-size: 28rpx;
+  color: var(--color-text-primary);
+  line-height: 1.7;
+  display: block;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 144rpx;
+}
+.log-img-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.log-img {
+  width: 30%;
+  flex: 0 0 auto;
+  aspect-ratio: 1;
+  border-radius: 8rpx;
+  background: var(--color-bg-secondary);
+}

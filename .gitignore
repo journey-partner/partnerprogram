@@ -1,0 +1,25 @@
+# 微信开发者工具 - 个人配置（含本地设置，不要提交）
+project.private.config.json
+
+# 依赖
+node_modules/
+miniprogram_npm/
+
+# 云函数依赖
+cloudfunctions/*/node_modules/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 日志
+*.log
+npm-debug.log*

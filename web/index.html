@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web 端任务管理 - 多端共享 API 演示</title>
+  <style>
+    :root {
+      --bg: #F8F9F5;
+      --card: #ffffff;
+      --primary: #6366f1;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text: #111827;
+      --text-secondary: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 1px 3px rgba(0,0,0,.08);
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container { max-width: 640px; margin: 0 auto; padding: 20px; }
+
+    /* Header */
+    .header {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .header h1 { font-size: 22px; margin-bottom: 8px; }
+    .header .badge {
+      display: inline-block;
+      background: #eef2ff;
+      color: var(--primary);
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-weight: 500;
+    }
+
+    .env-indicator {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    .env-indicator.cloud { background: #d1fae5; color: #065f46; }
+    .env-indicator.local { background: #fef3c7; color: #92400e; }
+    .env-indicator.pending { background: #dbeafe; color: #1e40af; }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px 10px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .num { font-size: 24px; font-weight: 700; }
+    .stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .stat-card .num.in-progress { color: var(--primary); }
+    .stat-card .num.completed { color: var(--success); }
+    .stat-card .num.cancelled { color: var(--danger); }
+    .stat-card .num.total { color: var(--text); }
+
+    /* Task List */
+    .task-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .task-item {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform .15s;
+    }
+    .task-item:active { transform: scale(.98); }
+
+    .task-check {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .2s;
+      font-size: 14px;
+    }
+    .task-check.done {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+    .task-check.disabled { opacity: .4; pointer-events: none; }
+
+    .task-info { flex: 1; min-width: 0; }
+    .task-name { font-size: 16px; font-weight: 600; }
+    .task-meta { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+    .task-status {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .task-status.in_progress { background: #eef2ff; color: var(--primary); }
+    .task-status.completed { background: #d1fae5; color: #065f46; }
+    .task-status.cancelled { background: #fee2e2; color: #991b1b; }
+
+    .task-streak {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-top: 6px;
+    }
+    .streak-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .streak-dot.filled { background: var(--success); }
+
+    /* Empty */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+    .empty .emoji { font-size: 48px; margin-bottom: 12px; }
+
+    /* Form */
+    .form-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .form-section h3 { font-size: 16px; margin-bottom: 12px; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+    .btn-danger {
+      display: inline-block;
+      padding: 4px 12px;
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all .2s;
+      border: none;
+      background: none;
+    }
+    .tab.active { background: var(--card); color: var(--text); font-weight: 600; box-shadow: var(--shadow); }
+
+    /* Sync indicator */
+    .sync-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .sync-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .sync-dot.online { background: var(--success); }
+    .sync-dot.offline { background: #fbbf24; }
+
+    /* Responsive */
+    @media (max-width: 400px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📋 任务管理</h1>
+      <div>
+        <span class="badge">🌐 Web 端</span>
+        <span id="envIndicator" class="env-indicator pending">连接中...</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">
+        与微信小程序共享同一后端，数据实时同步
+      </p>
+      <div class="sync-bar">
+        <span class="sync-dot" id="syncDot" style="background:#fbbf24;"></span>
+        <span id="syncText">数据来源: 本地存储（演示模式）</span>
+      </div>
+    </div>
+
+    <!-- Quick Create -->
+    <div class="form-section">
+      <h3>➕ 快速创建任务</h3>
+      <div class="form-group">
+        <label>任务名称</label>
+        <input id="taskName" type="text" placeholder="例如：每天运动30分钟" />
+      </div>
+      <div class="form-group">
+        <label>打卡类型</label>
+        <select id="checkinType">
+          <option value="daily">每日打卡</option>
+          <option value="weekly">每周打卡</option>
+          <option value="none">无需打卡</option>
+        </select>
+      </div>
+      <div class="form-group" id="weeklyDaysGroup" style="display:none;">
+        <label>打卡日</label>
+        <div id="weeklyDaysCheckboxes" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createTask()" id="createBtn">
+        创建任务
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" id="stats"></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('in_progress')">进行中</button>
+      <button class="tab" onclick="switchTab('completed')">已完成</button>
+      <button class="tab" onclick="switchTab('cancelled')">已取消</button>
+      <button class="tab" onclick="switchTab('all')">全部</button>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list" id="taskList">
+      <div class="empty">
+        <div class="emoji">📭</div>
+        <p>暂无任务，创建你的第一个任务吧！</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 核心：共享 API 调用层 ========== -->
+  <script>
+    // ============================================
+    // 方案二核心：共享 API 模块
+    // 这里演示 Web 端如何调用与小程序相同的后端
+    // ============================================
+
+    /**
+     * API 配置
+     * 
+     * 生产环境中，你需要：
+     * 1. 在云开发控制台为 tasksApi 云函数开启 HTTP 触发器
+     * 2. 将下方 API_URL 替换为触发器提供的 URL
+     * 3. 或者直接使用 CloudBase Web SDK 调用（需引入 cloudbase.js）
+     * 
+     * 当前演示使用 localStorage 模拟，展示架构设计
+     */
+    const API_CONFIG = {
+      // 模式: 'local' | 'cloud'
+      // 改 'cloud' 后需配置下方 URL 和 token
+      mode: 'local',
+
+      // HTTP 触发器 URL（云开发控制台 -> 云函数 -> tasksApi -> HTTP 触发器）
+      apiUrl: 'https://你的环境ID.service.tcloudbase.com/tasksApi',
+
+      // CloudBase 环境 ID
+      envId: 'cloudbase-d0g2f9pho3fc14998'
+    };
+
+    // ========== 数据存储（模拟） ==========
+    const LOCAL_KEY = 'web_tasks_demo';
+
+    function getLocalTasks() {
+      try {
+        return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+      } catch { return []; }
+    }
+
+    function saveLocalTasks(tasks) {
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(tasks));
+    }
+
+    function generateId() {
+      return 'web_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    // ========== API 层（Web 端实现） ==========
+    // 
+    // 这个模块与小程序端的 utils/cloudStore.js 是完全对应的！
+    // 两者调用同一个云函数 tasksApi，实现数据共享。
+    //
+    const api = {
+      /** 获取所有任务 - 对应云函数 action: 'list' */
+      async getTasks() {
+        if (API_CONFIG.mode === 'cloud') {
+          return await cloudCall('list');
+        }
+        // 演示模式：本地存储
+        return getLocalTasks();
+      },
+
+      /** 获取单个任务 - 对应云函数 action: 'get' */
+      async getTask(id) {
+        if (API_CONFIG.mode === 'cloud') {
+          return await cloudCall('get', { id });
+        }
+        return getLocalTasks().find(t => t.id === id) || null;
+      },
+
+      /** 创建任务 - 对应云函数 action: 'create' */
+      async createTask(taskData) {
+        if (API_CONFIG.mode === 'cloud') {
+          return await cloudCall('create', { data: taskData });
+        }
+        const tasks = getLocalTasks();
+        const task = {
+          ...taskData,
+          id: generateId(),
+          status: 'in_progress',
+          checkInRecords: [],
+          createdAt: new Date().toISOString()
+        };
+        tasks.unshift(task);
+        saveLocalTasks(tasks);
+        return task;
+      },
+
+      /** 更新任务 - 对应云函数 action: 'update' */
+      async updateTask(id, updates) {
+        if (API_CONFIG.mode === 'cloud') {
+          return await cloudCall('update', { id, data: updates });
+        }
+        const tasks = getLocalTasks();
+        const idx = tasks.findIndex(t => t.id === id);
+        if (idx !== -1) {
+          tasks[idx] = { ...tasks[idx], ...updates };
+          saveLocalTasks(tasks);
+          return tasks[idx];
+        }
+        return null;
+      },
+
+      /** 打卡 - 对应云函数 action: 'checkin' */
+      async checkInTask(id, date, done = true) {
+        if (API_CONFIG.mode === 'cloud') {
+          return await cloudCall('checkin', { id, data: { date, done } });
+        }
+        const tasks = getLocalTasks();
+        const idx = tasks.findIndex(t => t.id === id);
+        if (idx !== -1) {
+          const records = tasks[idx].checkInRecords || [];
+          const rIdx = records.findIndex(r => r.date === date);
+          if (rIdx === -1) records.push({ date, done });
+          else records[rIdx].done = done;
+          tasks[idx].checkInRecords = records;
+          tasks[idx].lastCheckIn = date;
+          saveLocalTasks(tasks);
+          return { checkInRecords: records };
+        }
+        return null;
+      },
+
+      /** 获取统计 - 对应云函数 action: 'stats' */
+      async getStats() {
+        if (API_CONFIG.mode === 'cloud') {
+          return await cloudCall('stats');
+        }
+        const tasks = getLocalTasks();
+        return {
+          total: tasks.length,
+          inProgress: tasks.filter(t => t.status === 'in_progress').length,
+          completed: tasks.filter(t => t.status === 'completed').length,
+          cancelled: tasks.filter(t => t.status === 'cancelled').length
+        };
+      }
+    };
+
+    /**
+     * HTTP 触发器调用（生产环境使用）
+     * 需要先在云开发控制台为 tasksApi 开启 HTTP 服务
+     */
+    async function cloudCall(action, params = {}) {
+      try {
+        const res = await fetch(API_CONFIG.apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, ...params })
+        });
+        const result = await res.json();
+        if (result.code === 0) return result.data;
+        throw new Error(result.msg || '请求失败');
+      } catch (err) {
+        console.error('API Error:', err);
+        throw err;
+      }
+    }
+
+    // ========== 页面逻辑 ==========
+    const STATUS_MAP = {
+      'in_progress': '进行中',
+      'completed': '已完成',
+      'cancelled': '已取消'
+    };
+
+    let currentTab = 'in_progress';
+
+    // 获取今日日期字符串
+    function getTodayStr() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    // 检查今日是否打卡
+    function isCheckedToday(task) {
+      const today = getTodayStr();
+      return (task.checkInRecords || []).some(r => r.date === today && r.done);
+    }
+
+    // 计算连续打卡天数
+    function calcStreak(task) {
+      const records = task.checkInRecords || [];
+      let streak = 0;
+      const checkDate = new Date();
+      for (let i = 0; i < 365; i++) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        if (!records.some(r => r.date === dateStr && r.done)) break;
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+      return streak;
+    }
+
+    // 计算本周打卡情况
+    function calcWeekProgress(task) {
+      const records = task.checkInRecords || [];
+      const progress = [];
+      let done = 0;
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split('T')[0];
+        const isDone = records.some(r => r.date === ds && r.done);
+        progress.push(isDone);
+        if (isDone) done++;
+      }
+      return { progress, done };
+    }
+
+    // 刷新页面
+    async function refresh() {
+      document.getElementById('envIndicator').textContent =
+        API_CONFIG.mode === 'cloud' ? '☁️ 云端模式' : '📱 本地演示';
+      document.getElementById('envIndicator').className =
+        'env-indicator ' + (API_CONFIG.mode === 'cloud' ? 'cloud' : 'local');
+
+      document.getElementById('syncDot').className =
+        'sync-dot ' + (API_CONFIG.mode === 'cloud' ? 'online' : 'offline');
+      document.getElementById('syncText').textContent =
+        API_CONFIG.mode === 'cloud'
+          ? '数据来源: CloudBase 云端（与小程序实时同步）'
+          : '数据来源: 本地存储（演示模式，切换 cloud 模式即可同步）';
+
+      const tasks = await api.getTasks();
+      const stats = await api.getStats();
+
+      // 渲染统计
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card">
+          <div class="num total">${stats.total}</div>
+          <div class="label">全部任务</div>
+        </div>
+        <div class="stat-card">
+          <div class="num in-progress">${stats.inProgress}</div>
+          <div class="label">进行中</div>
+        </div>
+        <div class="stat-card">
+          <div class="num completed">${stats.completed}</div>
+          <div class="label">已完成</div>
+        </div>
+        <div class="stat-card">
+          <div class="num cancelled">${stats.cancelled}</div>
+          <div class="label">已取消</div>
+        </div>
+      `;
+
+      // 筛选
+      const filtered = currentTab === 'all'
+        ? tasks
+        : tasks.filter(t => t.status === currentTab);
+
+      // 渲染列表
+      const listEl = document.getElementById('taskList');
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="empty">
+            <div class="emoji">📭</div>
+            <p>暂无${currentTab === 'all' ? '' : STATUS_MAP[currentTab] + '的'}任务</p>
+          </div>`;
+      } else {
+        listEl.innerHTML = filtered.map(t => {
+          const checked = isCheckedToday(t);
+          const streak = calcStreak(t);
+          const { progress, done } = calcWeekProgress(t);
+          const canCheck = t.status === 'in_progress' && (t.checkinType === 'daily');
+
+          return `
+          <div class="task-item">
+            <div class="task-check ${checked ? 'done' : ''} ${!canCheck ? 'disabled' : ''}"
+                 onclick="${canCheck ? `doCheckin('${t.id}')` : ''}"
+                 title="${checked ? '今日已打卡' : '点击打卡'}">
+              ${checked ? '✓' : ''}
+            </div>
+            <div class="task-info">
+              <div class="task-name">${escapeHtml(t.name || '未命名任务')}</div>
+              <div class="task-meta">
+                ${t.checkinType === 'daily' ? '📅 每日' : t.checkinType === 'weekly' ? '📆 每周' : '📌 无打卡'}
+                ${streak > 0 ? ` · 🔥 ${streak}天` : ''}
+              </div>
+              <div class="task-streak">
+                ${progress.map(p => `<span class="streak-dot ${p ? 'filled' : ''}"></span>`).join('')}
+                <span style="font-size:11px;color:var(--text-secondary);margin-left:4px;">
+                  ${done}/7 本周
+                </span>
+              </div>
+            </div>
+            <span class="task-status ${t.status}">${STATUS_MAP[t.status] || t.status}</span>
+            ${t.status !== 'cancelled' ? 
+              `<button class="btn-danger" onclick="cancelTask('${t.id}')">取消</button>` : ''}
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // 打卡
+    window.doCheckin = async function(id) {
+      const today = getTodayStr();
+      await api.checkInTask(id, today, true);
+      refresh();
+    };
+
+    // 取消任务
+    window.cancelTask = async function(id) {
+      if (!confirm('确定取消这个任务吗？')) return;
+      await api.updateTask(id, { status: 'cancelled' });
+      refresh();
+    };
+
+    // 切换 Tab
+    window.switchTab = function(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => {
+        if (t.textContent.includes(tab === 'all' ? '全部' : STATUS_MAP[tab])) {
+          t.classList.add('active');
+        }
+      });
+      refresh();
+    };
+
+    // 创建任务
+    window.createTask = async function() {
+      const name = document.getElementById('taskName').value.trim();
+      if (!name) { alert('请输入任务名称'); return; }
+
+      const taskData = {
+        name,
+        checkinType: document.getElementById('checkinType').value
+      };
+
+      if (taskData.checkinType === 'weekly') {
+        const checked = document.querySelectorAll('#weeklyDaysCheckboxes input:checked');
+        taskData.weeklyDays = Array.from(checked).map(c => parseInt(c.value));
+      }
+
+      const btn = document.getElementById('createBtn');
+      btn.disabled = true;
+      btn.textContent = '创建中...';
+
+      try {
+        await api.createTask(taskData);
+        document.getElementById('taskName').value = '';
+        refresh();
+      } catch (err) {
+        alert('创建失败: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '创建任务';
+      }
+    };
+
+    // 打卡类型切换时显示/隐藏每周打卡日选择
+    document.getElementById('checkinType').addEventListener('change', function() {
+      const group = document.getElementById('weeklyDaysGroup');
+      group.style.display = this.value === 'weekly' ? 'block' : 'none';
+    });
+
+    // 初始化周打卡日选择
+    const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+    const daysHtml = WEEKDAYS.map((d, i) =>
+      `<label style="font-size:13px;display:flex;align-items:center;gap:4px;">
+        <input type="checkbox" value="${i}" /> 周${d}
+      </label>`
+    ).join('');
+    document.getElementById('weeklyDaysCheckboxes').innerHTML = daysHtml;
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // 初始化
+    refresh();
+  </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+/* 日志创建 - 全部使用语义化变量 */
+
+.page-container {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* 区块 */
+.form-section {
+  margin: var(--space-lg) var(--space-xl);
+}
+.card.form-card {
+  padding: var(--space-xl);
+  margin-bottom: var(--space-lg);
+}
+.form-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+/* 标签卡片 */
+.tag-card {
+  padding: var(--space-lg) var(--space-xl) var(--space-xl);
+}
+.tag-card-header {
+  margin-bottom: var(--space-lg);
+}
+.tag-card-header .form-label {
+  margin-bottom: 6rpx;
+}
+.tag-card-desc {
+  font-size: 24rpx;
+  color: var(--color-text-muted);
+  display: block;
+}
+
+/* 标签芯片网格 */
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+.tag-chip {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 22rpx;
+  background: var(--color-bg-secondary);
+  border: 2rpx solid transparent;
+  border-radius: var(--radius-md);
+  transition: all 0.22s ease;
+  position: relative;
+}
+.tag-chip:active {
+  transform: scale(0.96);
+}
+.tag-chip-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 4rpx 16rpx rgba(124,58,237,0.25);
+}
+.tag-chip-icon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tag-chip-active .tag-chip-icon {
+  background: rgba(255,255,255,0.25) !important;
+}
+.tag-chip-text {
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.tag-chip-active .tag-chip-text {
+  color: #ffffff;
+  font-weight: 600;
+}
+.tag-chip-check {
+  width: 34rpx;
+  height: 34rpx;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 自定义类型输入 */
+.custom-tag-input {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1rpx solid var(--color-border-light);
+}
+.tag-input {
+  width: 100%;
+  min-height: 88rpx;
+  padding: 24rpx 28rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 2rpx solid var(--color-border);
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.tag-input:focus {
+  border-color: var(--color-accent);
+}
+
+/* 指引卡片 */
+.guide-block {
+  padding: var(--space-xl);
+  background: var(--color-accent-bg);
+  border: 1rpx solid var(--color-accent-border);
+}
+.guide-block-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: var(--space-md);
+}
+.guide-block-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.guide-block-tip {
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+}
+
+/* 内容区块 */
+.content-card {
+  position: relative;
+}
+.content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+.content-header .form-label {
+  margin-bottom: 0;
+}
+
+/* 语音按钮（内容区内） */
+.mic-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 20rpx;
+  background: var(--color-accent-bg);
+  border-radius: var(--radius-full);
+  border: 1rpx solid var(--color-accent-border);
+  transition: all 0.2s;
+}
+.mic-btn:active {
+  background: var(--color-bg);
+}
+.mic-recording {
+  background: #fef2f2;
+  border-color: var(--color-error);
+  animation: breathe 1.2s ease-in-out infinite;
+}
+.mic-text {
+  font-size: 24rpx;
+  color: var(--color-accent);
+  font-weight: 500;
+}
+.mic-recording .mic-text {
+  color: var(--color-error);
+}
+
+/* 录音状态条 */
+.recording-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: var(--space-md) var(--space-lg);
+  background: #fef2f2;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+  border: 1rpx solid #fecaca;
+}
+.recording-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: var(--color-error);
+  animation: breathe 0.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.recording-text {
+  font-size: 24rpx;
+  color: var(--color-error);
+  flex: 1;
+}
+
+/* 语音识别中 */
+.recognizing-bar {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+.recognizing-bar .recording-text {
+  color: #3b82f6;
+}
+.recognizing-dot {
+  background: #3b82f6;
+}
+
+/* 字数统计 */
+.content-counter {
+  text-align: right;
+  font-size: 24rpx;
+  color: var(--color-text-muted);
+  margin-top: 12rpx;
+  display: block;
+}
+
+/* 图片 */
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+.image-item {
+  width: calc(33.33% - 12rpx);
+  flex: 0 0 auto;
+  position: relative;
+  aspect-ratio: 1;
+}
+.preview-img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+.delete-img-btn {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  width: 44rpx;
+  height: 44rpx;
+  background: rgba(0,0,0,0.5);
+  color: var(--color-text-inverse);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+}
+.add-image-box {
+  aspect-ratio: 1;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 2rpx dashed var(--color-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.add-image-box:active {
+  background: var(--color-bg);
+  border-color: var(--color-accent);
+}
+.add-image-icon {
+  font-size: 52rpx;
+  color: var(--color-text-muted);
+  margin-bottom: 4rpx;
+}
+.add-image-text {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+}
+.image-saving-box {
+  aspect-ratio: 1;
+  background: var(--color-accent-bg);
+  border-radius: var(--radius-md);
+  border: 2rpx dashed var(--color-accent-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.image-saving-icon {
+  font-size: 44rpx;
+  margin-bottom: 4rpx;
+}
+.image-saving-text {
+  font-size: 20rpx;
+  color: var(--color-accent);
+  font-weight: 500;
+}
+.image-hint-text {
+  font-size: 22rpx;
+  color: var(--color-text-muted);
+  margin-top: var(--space-sm);
+  text-align: center;
+  display: block;
+}
+
+/* 保存按钮 */
+.save-btn-inactive {
+  background: var(--color-border);
+}
+.save-btn-active {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-md);
+}

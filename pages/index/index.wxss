@@ -1,0 +1,75 @@
+/* 启动页 */
+
+.splash-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ecfdf5;
+}
+
+.splash-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeInUp 0.6s ease;
+}
+
+.splash-logo {
+  width: 120rpx;
+  height: 120rpx;
+  background: #059669;
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 36rpx;
+  box-shadow: 0 12rpx 32rpx rgba(5, 150, 105, 0.3);
+}
+
+.splash-logo-text {
+  font-size: 64rpx;
+  line-height: 1;
+}
+
+.splash-title {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #059669;
+  margin-bottom: 16rpx;
+}
+
+.splash-slogan {
+  font-size: 28rpx;
+  color: #6b7280;
+  margin-bottom: 56rpx;
+}
+
+/* loading dots */
+.splash-loading {
+  display: flex;
+  gap: 12rpx;
+}
+
+.splash-dot {
+  width: 12rpx;
+  height: 12rpx;
+  background: #059669;
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: splashPulse 1.2s ease-in-out infinite;
+}
+
+.splash-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.splash-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes splashPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}

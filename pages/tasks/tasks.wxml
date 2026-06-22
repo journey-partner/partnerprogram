@@ -1,0 +1,122 @@
+<!-- Nav spacer since nav-bar is fixed -->
+<view class="nav-spacer"></view>
+
+<view class="page-container">
+
+  <!-- 导航 -->
+  <view class="nav-bar">
+    <view class="nav-btn-left"></view>
+    <text class="nav-title">任务管理</text>
+    <view class="nav-btn-right"></view>
+  </view>
+
+  <!-- 筛选下拉 -->
+  <view class="filter-bar">
+    <view class="filter-dropdown" bindtap="toggleFilter">
+      <text class="filter-text">{{statusLabel}}</text>
+      <text class="filter-arrow">{{showFilter ? '▲' : '▼'}}</text>
+    </view>
+    <text class="filter-count">共 {{filteredTasks.length}} 项</text>
+  </view>
+  <view class="filter-options" wx:if="{{showFilter}}">
+    <view class="filter-option {{activeStatus === 'in_progress' ? 'option-active' : ''}}" 
+          bindtap="onStatusFilter" data-status="in_progress">
+      进行中<text class="option-count" wx:if="{{taskCounts.inProgress > 0}}">{{taskCounts.inProgress}}</text>
+    </view>
+    <view class="filter-option {{activeStatus === 'not_started' ? 'option-active' : ''}}" 
+          bindtap="onStatusFilter" data-status="not_started">
+      未开始<text class="option-count" wx:if="{{taskCounts.notStarted > 0}}">{{taskCounts.notStarted}}</text>
+    </view>
+    <view class="filter-option {{activeStatus === 'completed' ? 'option-active' : ''}}" 
+          bindtap="onStatusFilter" data-status="completed">
+      已完成<text class="option-count" wx:if="{{taskCounts.completed > 0}}">{{taskCounts.completed}}</text>
+    </view>
+    <view class="filter-option {{activeStatus === 'cancelled' ? 'option-active' : ''}}" 
+          bindtap="onStatusFilter" data-status="cancelled">
+      已取消<text class="option-count" wx:if="{{taskCounts.cancelled > 0}}">{{taskCounts.cancelled}}</text>
+    </view>
+    <view class="filter-option {{activeStatus === 'all' ? 'option-active' : ''}}" 
+          bindtap="onStatusFilter" data-status="all">
+      全部<text class="option-count" wx:if="{{taskCounts.all > 0}}">{{taskCounts.all}}</text>
+    </view>
+  </view>
+
+  <!-- 任务列表 -->
+  <view class="list" wx:if="{{filteredTasks.length > 0}}">
+    <view class="card card-elevated task-card-item" 
+          wx:for="{{filteredTasks}}" wx:key="id" 
+          bindtap="goToDetail" data-id="{{item.id}}">
+      
+      <!-- 打卡按钮（仅对有打卡的任务显示） -->
+      <view class="task-check {{item.checkInToday ? 'task-check-done' : ''}}" 
+            catchtap="doCheckin" data-id="{{item.id}}" 
+            wx:if="{{item.checkinType !== 'none' && item.status !== 'completed' && item.status !== 'cancelled'}}">
+        <text wx:if="{{item.checkInToday}}">✓</text>
+      </view>
+
+      <!-- 信息 -->
+      <view class="task-info">
+        <view class="task-info-head">
+          <text class="task-name {{item.status === 'completed' ? 'done' : ''}}">{{item.name}}</text>
+        </view>
+        
+        <!-- 状态 + 打卡标签 -->
+        <view class="task-tags">
+          <text class="status-tag status-{{item.status}}">{{item.statusLabel}}</text>
+          <text class="tag tag-primary" wx:if="{{item.checkinType === 'daily'}}">每日打卡</text>
+          <text class="tag tag-accent" wx:if="{{item.checkinType === 'weekly'}}">每周打卡</text>
+          <text class="tag tag-warning" wx:if="{{item.currentStreak > 0}}">{{item.currentStreak}}天</text>
+        </view>
+
+        <!-- 计划时间 -->
+        <text class="task-time" wx:if="{{item.planStartDate || item.planEndDate}}">
+          {{item.planStartDate || '?'}} 至 {{item.planEndDate || '?'}}
+        </text>
+
+        <!-- 打卡进度点 -->
+        <view class="progress-dots" wx:if="{{item.checkinType !== 'none' && item.weekProgress}}">
+          <view class="dot {{idx === 6 ? 'dot-today' : ''}} {{dot ? 'dot-done' : ''}}" 
+                wx:for="{{item.weekProgress}}" wx:for-index="idx" wx:key="idx" wx:for-item="dot"></view>
+          <text class="progress-count" wx:if="{{item.weekDone > 0}}">{{item.weekDone}}/{{item.weekTotal}}</text>
+        </view>
+      </view>
+
+      <!-- 操作 -->
+      <view class="edit-icon" catchtap="editTask" data-id="{{item.id}}">
+        <icon name="dots" size="36" color="#9ca3af" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredTasks.length === 0}}">
+    <view class="empty-icon">
+      <icon name="tasks" size="80" color="#d1d5db" />
+    </view>
+    <text class="empty-title">暂无任务</text>
+    <text class="empty-desc">创建一个任务开始吧</text>
+    <view class="btn btn-primary" bindtap="goToCreate">创建任务</view>
+  </view>
+
+  <!-- 悬浮按钮 -->
+  <view class="fab fab-primary" bindtap="goToCreate">
+    <view class="fab-icon"><text class="fab-plus">+</text></view>
+  </view>
+
+  <!-- 鼓励弹窗 -->
+  <view class="modal-mask" wx:if="{{showEncourage}}" catchtap="closeEncourage">
+    <view class="modal-body" catchtap="void">
+      <text class="modal-emoji">{{encourageData.emoji}}</text>
+      <text class="modal-title">{{encourageData.text}}</text>
+      <view class="modal-streak" wx:if="{{encourageData.streak > 0}}">
+        <text class="streak-num">{{encourageData.streak}}</text>
+        <text class="streak-label">天连续打卡</text>
+      </view>
+      <text class="modal-tip">{{encourageData.tip}}</text>
+      <view class="btn btn-primary" bindtap="closeEncourage">太棒了</view>
+    </view>
+  </view>
+
+</view>
+<!-- custom tab bar -->
+<custom-tab-bar />

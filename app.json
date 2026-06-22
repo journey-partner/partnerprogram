@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/rainbow-card/rainbow-card",
+    "pages/tasks/tasks",
+    "pages/logs/logs",
+    "pages/task-create/task-create",
+    "pages/task-detail/task-detail",
+    "pages/log-create/log-create",
+    "pages/log-detail/log-detail"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom",
+    "backgroundColor": "#F8F9F5"
+  },
+  "tabBar": {
+    "custom": true,
+    "list": [
+      {
+        "pagePath": "pages/rainbow-card/rainbow-card",
+        "text": "彩虹卡"
+      },
+      {
+        "pagePath": "pages/tasks/tasks",
+        "text": "任务"
+      },
+      {
+        "pagePath": "pages/logs/logs",
+        "text": "日志"
+      }
+    ]
+  },
+  "style": "v2",
+  "renderer": "webview",
+  "componentFramework": "exparser",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "usingComponents": {
+    "icon": "/components/icon/icon"
+  }
+}

@@ -1,0 +1,396 @@
+/* ============================================
+   设计规范 v3.0 — 严格语义化
+   ============================================ */
+
+/* ---------- 1. 色彩令牌 ---------- */
+page {
+  /* 主色系（品牌色） */
+  --color-primary:         #059669;   /* 主绿 */
+  --color-primary-light:   #34d399;
+  --color-primary-dark:    #047857;
+  --color-primary-bg:      #ecfdf5;
+  --color-primary-border:  #a7f3d0;
+
+  /* 强调色 */
+  --color-accent:          #7c3aed;   /* 紫 */
+  --color-accent-light:    #a78bfa;
+  --color-accent-bg:       #f5f3ff;
+  --color-accent-border:   #ddd6fe;
+
+  /* 语义功能色 */
+  --color-success:         #059669;
+  --color-warning:         #d97706;
+  --color-error:           #dc2626;
+  --color-info:            #2563eb;
+
+  /* 中性色 */
+  --color-white:           #ffffff;
+  --color-bg:              #fafcf9;
+  --color-bg-secondary:    #f3f4f6;
+  --color-border:          #e5e7eb;
+  --color-border-light:    #f3f4f6;
+
+  /* 文字色 */
+  --color-text-primary:    #111827;
+  --color-text-secondary:  #6b7280;
+  --color-text-muted:      #9ca3af;
+  --color-text-disabled:   #d1d5db;
+  --color-text-inverse:    #ffffff;
+
+  /* ---------- 2. 间距令牌 ---------- */
+  --space-xs:  8rpx;
+  --space-sm:  12rpx;
+  --space-md:  16rpx;
+  --space-lg:  24rpx;
+  --space-xl:  32rpx;
+  --space-2xl: 48rpx;
+
+  /* ---------- 3. 圆角令牌 ---------- */
+  --radius-sm:   12rpx;
+  --radius-md:   16rpx;
+  --radius-lg:   24rpx;
+  --radius-xl:   32rpx;
+  --radius-full: 9999rpx;
+
+  /* ---------- 4. 阴影令牌 ---------- */
+  --shadow-sm:  0 1rpx 3rpx rgba(0,0,0,0.04);
+  --shadow-md:  0 4rpx 12rpx rgba(0,0,0,0.06);
+  --shadow-lg:  0 8rpx 24rpx rgba(0,0,0,0.08);
+  --shadow-xl:  0 16rpx 40rpx rgba(0,0,0,0.1);
+}
+
+/* ---------- 5. 全局重置 ---------- */
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  font-size: 28rpx;
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+page, view, text, image, button, input, textarea {
+  box-sizing: border-box;
+}
+
+/* ============================================
+   6. 统一组件样式库（所有页面共用）
+   ============================================ */
+
+/* --- 按钮 --- */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 24rpx 40rpx;
+  border-radius: var(--radius-full);
+  font-size: 30rpx;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: none;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.btn-accent {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2rpx solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* 小按钮 */
+.btn-sm {
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+}
+.btn-xs {
+  padding: 8rpx 16rpx;
+  font-size: 22rpx;
+}
+
+/* --- 卡片 --- */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--color-border-light);
+}
+.card-elevated {
+  box-shadow: var(--shadow-md);
+}
+
+/* --- 标签 --- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 6rpx 14rpx;
+  border-radius: var(--radius-sm);
+  font-size: 22rpx;
+  font-weight: 500;
+}
+.tag-primary {
+  background: var(--color-primary-bg);
+  color: var(--color-primary-dark);
+}
+.tag-accent {
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+}
+.tag-success {
+  background: var(--color-primary-bg);
+  color: var(--color-primary-dark);
+}
+.tag-warning {
+  background: #fef3c7;
+  color: var(--color-warning);
+}
+.tag-danger {
+  background: #fee2e2;
+  color: var(--color-error);
+} 
+.tag-default {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+/* --- 输入框 --- */
+.input {
+  width: 100%;
+  padding: 20rpx 0;
+  font-size: 30rpx;
+  color: var(--color-text-primary);
+  border-bottom: 2rpx solid var(--color-border-light);
+  background: transparent;
+  transition: border-color 0.2s;
+}
+.input:focus {
+  border-bottom-color: var(--color-primary);
+}
+.input::placeholder {
+  color: var(--color-text-disabled);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 160rpx;
+  padding: 16rpx 0;
+  font-size: 30rpx;
+  color: var(--color-text-primary);
+  line-height: 1.8;
+  background: transparent;
+}
+.textarea::placeholder {
+  color: var(--color-text-disabled);
+}
+
+/* --- 分隔线 --- */
+.divider {
+  height: 1rpx;
+  background: var(--color-border-light);
+  margin: var(--space-lg) 0;
+}
+
+/* --- 导航栏 --- */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  padding-top: calc(env(safe-area-inset-top) + 16rpx);
+  padding-left: 24rpx;
+  padding-right: 24rpx;
+  padding-bottom: 20rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid var(--color-border-light);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* 导航栏占位 spacer，精确匹配 nav-bar 高度 */
+/* nav-bar 实际高度 = safe-top + 16rpx(padding-top) + 44rpx(图标/文字) + 20rpx(padding-bottom) = safe-top + 80rpx */
+.nav-spacer {
+  height: calc(80rpx + env(safe-area-inset-top));
+}
+
+/* 左侧按钮容器 */
+.nav-btn-left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  min-width: 72rpx;
+}
+
+/* 右侧按钮容器 */
+.nav-btn-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 72rpx;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 16rpx;
+}
+
+/* 通用按钮样式（保留兼容旧结构） */
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64rpx;
+  height: 64rpx;
+  padding: 0;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+.nav-btn-text {
+  font-size: 26rpx;
+  font-weight: 500;
+  padding: 12rpx 4rpx;
+  width: auto;
+}
+
+/* --- 空状态 --- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
+  text-align: center;
+}
+.empty-icon {
+  width: 160rpx;
+  height: 160rpx;
+  margin-bottom: var(--space-xl);
+  opacity: 0.5;
+}
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+.empty-desc {
+  font-size: 28rpx;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2xl);
+}
+
+/* --- 悬浮按钮 FAB --- */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 80rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.2s;
+}
+.fab:active { transform: scale(0.93); }
+.fab-primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.fab-accent {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+.fab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fab-plus {
+  font-size: 52rpx;
+  font-weight: 300;
+  color: #ffffff;
+  line-height: 1;
+}
+
+/* --- 底部操作栏 --- */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx var(--space-xl);
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 32rpx rgba(0,0,0,0.06);
+  box-sizing: border-box;
+  z-index: 100;
+}
+
+/* --- 引导提示卡片 --- */
+.guide-card {
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  border: 1rpx solid var(--color-primary-border);
+}
+
+/* --- 动画 --- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16rpx); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.03); }
+}
+
+/* --- 安全区 --- */
+.safe-top {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}

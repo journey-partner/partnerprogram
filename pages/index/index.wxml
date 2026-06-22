@@ -1,0 +1,14 @@
+<view class="splash-container">
+  <view class="splash-body">
+    <view class="splash-logo">
+      <text class="splash-logo-text">🧳</text>
+    </view>
+    <text class="splash-title">旅伴</text>
+    <text class="splash-slogan">旅程中的每一天与你相伴</text>
+    <view class="splash-loading">
+      <view class="splash-dot"></view>
+      <view class="splash-dot"></view>
+      <view class="splash-dot"></view>
+    </view>
+  </view>
+</view>

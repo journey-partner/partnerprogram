@@ -1,0 +1,85 @@
+<!-- Nav spacer since nav-bar is fixed -->
+<view class="nav-spacer"></view>
+
+<view class="page-container">
+
+  <!-- 导航 -->
+  <view class="nav-bar">
+    <view class="nav-btn-left"></view>
+    <text class="nav-title">彩虹卡</text>
+    <view class="nav-btn-right"></view>
+  </view>
+
+  <!-- 未抽取状态 -->
+  <view class="draw-area" wx:if="{{!hasDrawn && !isAnimating}}">
+    <view class="draw-illustration">
+      <text class="draw-illustration-icon">🌈</text>
+    </view>
+    <text class="draw-title">今日彩虹能量</text>
+    <text class="draw-sub">每日一张，给你温柔的提醒</text>
+    <view class="btn btn-accent draw-btn {{isAnimating ? 'drawing' : ''}}" bindtap="drawCard">
+      <text>✨ 抽取今日彩虹卡</text>
+    </view>
+
+    <view class="card guide-card" style="margin-top:56rpx">
+      <view class="guide-row">
+        <view class="guide-row-icon"><icon name="lightbulb" size="44" color="#f59e0b" /></view>
+        <view>
+          <text class="guide-row-desc">彩虹卡，以色彩治愈情绪，以文字给予力量。\n在纷繁日常里，为你提供一份安静的心灵指引。\n每日抽一张，接纳当下、看见自己、慢慢笃定前行。</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 抽取动画 -->
+  <view class="drawing-area" wx:if="{{isAnimating}}">
+    <view class="flip-box">
+      <view class="flip-card {{flipClass}}">
+        <text class="flip-shimmer">✨</text>
+      </view>
+    </view>
+    <text class="drawing-text">正在为你抽取今日能量...</text>
+  </view>
+
+  <!-- 结果 -->
+  <view class="result-area" wx:if="{{hasDrawn}}">
+    <text class="result-label">✨ 今日彩虹卡已为你呈现</text>
+
+    <!-- 卡片主体 -->
+    <view class="rainbow-card-box" style="background: {{cardBgColor}}">
+      <view class="card-glow"></view>
+      <view class="card-body">
+        <view class="card-icon-wrap">
+          <text class="card-icon-big">{{cardIcon}}</text>
+        </view>
+        <text class="card-name-big">{{cardName}}</text>
+        <view class="card-divider"></view>
+        <text class="card-meaning">{{cardMeaning}}</text>
+      </view>
+    </view>
+
+    <!-- 肯定语 -->
+    <view class="card" style="background:#f5f3ff;border-color:#ddd6fe;margin-bottom:32rpx">
+      <text class="section-label"><icon name="heart" size="32" color="#7c3aed" /> 今日肯定语</text>
+      <text class="affirmation">{{cardAffirmation}}</text>
+    </view>
+
+    <!-- 行动建议 -->
+    <text class="section-label" style="margin-bottom:16rpx"><icon name="tasks" size="32" color="#059669" /> 今日行动建议</text>
+    <view class="card action-card">
+      <view class="action-item" wx:for="{{actions}}" wx:key="index">
+        <view class="action-num">{{index + 1}}</view>
+        <text class="action-text">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- 再次提示 -->
+    <view class="again-box">
+      <view class="again-icon"><icon name="sun" size="44" color="#f59e0b" /></view>
+      <text class="again-text">明天再来抽取新的彩虹卡吧~</text>
+    </view>
+  </view>
+
+</view>
+<!-- custom tab bar -->
+<custom-tab-bar />

@@ -1,0 +1,155 @@
+<!-- Nav spacer since nav-bar is fixed -->
+<view class="nav-spacer"></view>
+
+<view class="page-container">
+
+  <!-- 导航 -->
+  <view class="nav-bar">
+    <view class="nav-btn-left">
+      <text class="nav-btn" bindtap="goBack"><icon name="arrow-left" size="40" /></text>
+    </view>
+    <text class="nav-title">任务详情</text>
+    <view class="nav-btn-right"></view>
+  </view>
+
+  <!-- 任务头 -->
+  <view class="page-block">
+    <view class="card card-elevated detail-card">
+      <view class="task-head-row">
+        <view class="task-head-info">
+          <text class="task-name-big {{task.status === 'completed' ? 'done' : ''}}">{{task.name}}</text>
+          <view class="meta-row">
+            <text class="status-tag status-{{task.status}}">{{statusLabel}}</text>
+            <text class="tag tag-primary" wx:if="{{task.checkinType === 'daily'}}">每日打卡</text>
+            <text class="tag tag-accent" wx:if="{{task.checkinType === 'weekly'}}">每周打卡</text>
+            <text class="tag tag-default" wx:if="{{task.hasReminder}}"><icon name="clock" size="24" color="#6b7280" /> {{task.reminderTime}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 计划时间 -->
+  <view class="page-block" wx:if="{{task.planStartDate || task.planEndDate}}">
+    <view class="card detail-card">
+      <text class="form-label"><icon name="calendar" size="32" color="#059669" /> 计划时间</text>
+      <view class="plan-time-row">
+        <view class="plan-time-item">
+          <text class="plan-time-label">开始</text>
+          <text class="plan-time-value">{{task.planStartDate || '未设置'}}</text>
+        </view>
+        <text class="plan-time-arrow">→</text>
+        <view class="plan-time-item">
+          <text class="plan-time-label">结束</text>
+          <text class="plan-time-value">{{task.planEndDate || '未设置'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 打卡周期 -->
+  <view class="page-block" wx:if="{{task.checkinType === 'weekly'}}">
+    <view class="card detail-card">
+      <text class="form-label"><icon name="star" size="32" color="#f59e0b" /> 打卡周期</text>
+      <text class="detail-text">每周 {{weekDayNames}} 打卡</text>
+    </view>
+  </view>
+
+  <!-- 描述 -->
+  <view class="page-block" wx:if="{{task.description}}">
+    <view class="card detail-card">
+      <text class="form-label"><icon name="journal" size="32" color="#7c3aed" /> 任务描述</text>
+      <text class="detail-text">{{task.description}}</text>
+    </view>
+  </view>
+
+  <!-- 状态管理 -->
+  <view class="page-block">
+    <view class="card detail-card">
+      <text class="form-label"><icon name="settings" size="32" color="#6b7280" /> 任务状态</text>
+      <view class="status-row">
+        <view class="status-btn {{task.status === 'not_started' ? 'status-btn-active status-btn-ns' : ''}}" 
+              bindtap="changeStatus" data-status="not_started">未开始</view>
+        <view class="status-btn {{task.status === 'in_progress' ? 'status-btn-active status-btn-ip' : ''}}" 
+              bindtap="changeStatus" data-status="in_progress">进行中</view>
+        <view class="status-btn {{task.status === 'completed' ? 'status-btn-active status-btn-cp' : ''}}" 
+              bindtap="changeStatus" data-status="completed">已完成</view>
+        <view class="status-btn {{task.status === 'cancelled' ? 'status-btn-active status-btn-cl' : ''}}" 
+              bindtap="changeStatus" data-status="cancelled">已取消</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 打卡区域 -->
+  <view class="page-block" wx:if="{{task.checkinType !== 'none'}}">
+    <view class="card detail-card checkin-card">
+      <view class="section-header">
+        <text class="form-label"><icon name="star" size="32" color="#f59e0b" /> 今日打卡</text>
+        <text class="streak-badge" wx:if="{{task.currentStreak > 0}}">{{task.currentStreak}}天连续</text>
+      </view>
+
+      <view class="checkin-btn-box {{task.checkInToday ? 'checkin-btn-box-done' : ''}}" bindtap="doCheckin">
+        <text class="checkin-btn-icon">{{task.checkInToday ? '✓' : '○'}}</text>
+        <text class="checkin-btn-text">{{task.checkInToday ? '今日已完成' : '点击打卡'}}</text>
+      </view>
+
+      <view class="encourage-box" wx:if="{{task.encourageText}}">
+        <text class="encourage-text">{{task.encourageText}}</text>
+      </view>
+
+      <!-- 周进度 -->
+      <view>
+        <view style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16rpx">
+          <text style="font-size:26rpx;color:#6b7280">本周进度</text>
+          <text style="font-size:26rpx;color:#059669;font-weight:600">{{weekDoneCount}}/{{weekTotal}}</text>
+        </view>
+        <view class="week-dots-row">
+          <view class="day-item" wx:for="{{weekDays}}" wx:key="index">
+            <view class="day-dot {{item.done ? 'day-dot-done' : ''}} {{item.isEmpty ? 'day-dot-none' : ''}} {{item.isToday ? 'day-dot-today' : ''}}"></view>
+            <text class="day-label">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 日历 -->
+  <view class="page-block" wx:if="{{task.checkinType !== 'none' && task.checkInRecords.length > 0}}">
+    <view class="card detail-card">
+      <text class="form-label"><icon name="calendar" size="32" color="#059669" /> 打卡记录</text>
+      <text class="cal-month">{{currentMonth}}</text>
+      <view class="weekday-row">
+        <text class="weekday" wx:for="{{weekdays}}" wx:key="index">{{item}}</text>
+      </view>
+      <view class="date-grid">
+        <view class="date-cell {{item.done ? 'date-cell-done' : ''}} {{item.empty ? 'date-cell-empty' : ''}} {{item.isToday ? 'date-cell-today' : ''}}" 
+              wx:for="{{calendarDays}}" wx:key="index">
+          <text>{{item.day}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计 -->
+  <view class="page-block" wx:if="{{task.checkinType !== 'none'}}">
+    <view class="card detail-card stats-card">
+      <text class="form-label"><icon name="chart" size="32" color="#059669" /> 统计数据</text>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-value">{{task.totalDays || 0}}</text>
+          <text class="stat-label">累计天数</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{task.currentStreak || 0}}</text>
+          <text class="stat-label">连续天数</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{task.bestStreak || 0}}</text>
+          <text class="stat-label">最长连续</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>
+

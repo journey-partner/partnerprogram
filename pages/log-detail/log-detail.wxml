@@ -1,0 +1,61 @@
+<!-- Nav spacer since nav-bar is fixed -->
+<view class="nav-spacer"></view>
+
+<view class="page-container">
+
+  <!-- 导航 -->
+  <view class="nav-bar">
+    <view class="nav-btn-left">
+      <text class="nav-btn" bindtap="goBack"><icon name="arrow-left" size="40" /></text>
+    </view>
+    <text class="nav-title">日志详情</text>
+    <view class="nav-btn-right"></view>
+  </view>
+
+  <!-- 日志内容 -->
+  <view class="card card-elevated log-card">
+    <view class="log-tag-row">
+      <text class="tag" style="background:{{log.tagColor}}1a;color:{{log.tagColor}}">{{log.tagName}}</text>
+    </view>
+
+    <text class="log-text-content">{{log.content}}</text>
+
+    <!-- 图片 -->
+    <view class="log-images" wx:if="{{log.images && log.images.length > 0}}">
+      <view class="log-image-wrap" wx:for="{{log.images}}" wx:key="index" wx:for-item="item" wx:for-index="idx">
+        <image class="log-image {{item._error ? 'log-image-error' : ''}}" 
+               src="{{item._error ? '' : item._url}}" 
+               mode="aspectFill" 
+               binderror="onImageError"
+               bindtap="previewImage"
+               data-url="{{item._url}}"
+               data-index="{{idx}}"/>
+        <view class="log-image-fallback" wx:if="{{item._error}}">
+          <text class="fallback-icon">🖼</text>
+          <text class="fallback-text">图片已失效</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 时间 -->
+    <view class="log-time-row">
+      <text class="time-text">{{log.dateStr}}</text>
+      <text style="color:#e5e7eb">·</text>
+      <text class="time-text">{{log.timeStr}}</text>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="action-row">
+    <view class="action-item" bindtap="shareLog">
+      <view class="action-circle"><icon name="share" size="48" color="#6b7280" /></view>
+      <text class="action-label">分享</text>
+    </view>
+    <view class="action-item" bindtap="copyLog">
+      <view class="action-circle"><icon name="copy" size="48" color="#6b7280" /></view>
+      <text class="action-label">复制</text>
+    </view>
+  </view>
+
+</view>
+

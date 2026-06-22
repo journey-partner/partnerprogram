@@ -1,0 +1,114 @@
+<!-- Nav spacer since nav-bar is fixed -->
+<view class="nav-spacer"></view>
+
+<view class="page-container">
+
+  <!-- 导航 -->
+  <view class="nav-bar">
+    <view class="nav-btn-left">
+      <text class="nav-btn" bindtap="goBack"><icon name="arrow-left" size="40" /></text>
+    </view>
+    <text class="nav-title">记录日志</text>
+    <view class="nav-btn-right"></view>
+  </view>
+
+  <!-- 日志类型选择 -->
+  <view class="form-section">
+    <view class="card form-card tag-card">
+      <view class="tag-card-header">
+        <text class="form-label">选择日志类型 <text style="color:#dc2626">*</text></text>
+        <text class="tag-card-desc">选择一种类型，获取记录引导</text>
+      </view>
+      <!-- 快捷类型选择 -->
+      <view class="tag-chips">
+        <view class="tag-chip {{tagIndex === index ? 'tag-chip-active' : ''}}"
+              wx:for="{{tagOptions}}" wx:key="key" wx:for-index="index"
+              data-index="{{index}}" bindtap="onTagChipTap">
+          <view class="tag-chip-icon" style="background:{{item.color}}15">
+            <icon name="{{item.icon}}" size="28" color="{{item.color}}" />
+          </view>
+          <text class="tag-chip-text">{{item.name}}</text>
+          <view class="tag-chip-check" wx:if="{{tagIndex === index}}">
+            <icon name="checkmark" size="20" color="#ffffff" />
+          </view>
+        </view>
+      </view>
+      <!-- 自定义类型输入 -->
+      <view class="custom-tag-input" wx:if="{{isCustom}}">
+        <input class="tag-input" placeholder="输入自定义日志类型，如：学习笔记、工作记录..." value="{{customTag}}" bindinput="onCustomTagInput" maxlength="20" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 日志类型指引 -->
+  <view class="form-section" wx:if="{{tagIndex >= 0}}">
+    <view class="card guide-block">
+      <view class="guide-block-header">
+        <text class="guide-block-title">{{tagGuide.title}}</text>
+      </view>
+      <text class="guide-block-tip">{{tagGuide.tip}}</text>
+    </view>
+  </view>
+
+  <!-- 日志内容 -->
+  <view class="form-section">
+    <view class="card form-card content-card">
+      <view class="content-header">
+        <text class="form-label">记录内容 <text style="color:#dc2626">*</text></text>
+        <view class="mic-btn {{isRecording ? 'mic-recording' : ''}}" bindtap="toggleRecord">
+          <icon wx:if="{{!isRecording}}" name="mic" size="36" color="#7c3aed" />
+          <icon wx:else name="mic-off" size="36" color="#dc2626" />
+        <text class="mic-text">{{isRecording ? '点击停止' : '语音输入'}}</text>
+      </view>
+      </view>
+      <!-- 录音状态提示 -->
+      <view class="recording-bar" wx:if="{{isRecording}}">
+        <view class="recording-dot"></view>
+        <text class="recording-text">正在录音中... 再次点击按钮停止</text>
+      </view>
+      <!-- 语音识别中 -->
+      <view class="recording-bar recognizing-bar" wx:if="{{isRecognizing}}">
+        <view class="recording-dot recognizing-dot"></view>
+        <text class="recording-text">正在语音识别中...</text>
+      </view>
+      <textarea class="textarea" 
+                placeholder="{{tagIndex >= 0 ? tagGuide.placeholder : '从下拉框中选择日志类型，开始你的觉察之旅...'}}" 
+                value="{{content}}"
+                bindinput="onContentInput"
+                bindfocus="onContentFocus"
+                maxlength="500"></textarea>
+      <text class="content-counter">{{content.length}}/500</text>
+    </view>
+  </view>
+
+  <!-- 图片上传 -->
+  <view class="form-section">
+    <view class="card form-card">
+      <text class="form-label"><icon name="image" size="32" color="#7c3aed" /> 添加图片</text>
+      <view class="image-grid">
+        <view class="image-item" wx:for="{{images}}" wx:key="index">
+          <image class="preview-img" src="{{item}}" mode="aspectFill"/>
+          <view class="delete-img-btn" catchtap="deleteImage" data-index="{{index}}">×</view>
+        </view>
+        <view class="add-image-box" bindtap="chooseImage" wx:if="{{images.length < 9 && !isSavingImages}}">
+          <text class="add-image-icon">+</text>
+          <text class="add-image-text">添加图片</text>
+        </view>
+        <!-- 图片持久化中 -->
+        <view class="image-saving-box" wx:if="{{isSavingImages}}">
+          <text class="image-saving-icon">⏳</text>
+          <text class="image-saving-text">图片保存中...</text>
+        </view>
+      </view>
+      <text class="image-hint-text">最多9张图片，每张不超过5MB</text>
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="action-bar">
+    <view class="btn {{canSave ? 'btn-accent' : ''}}" style="{{canSave ? '' : 'background:#e5e7eb;'}}" bindtap="saveLog">
+      <text>保存日志</text>
+    </view>
+  </view>
+
+</view>

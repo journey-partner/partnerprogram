@@ -1,0 +1,9 @@
+{
+  "name": "tasksApi",
+  "version": "1.0.0",
+  "description": "共享任务 API - 为小程序和 Web 提供任务 CRUD",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
