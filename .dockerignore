@@ -1,0 +1,11 @@
+# Docker 构建忽略
+node_modules/
+.git/
+cloudfunctions/*/node_modules/
+miniprogram_npm/
+
+# 小程序本地配置（不需要在服务器中）
+project.private.config.json
+
+# macOS
+.DS_Store
